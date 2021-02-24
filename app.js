@@ -1,7 +1,34 @@
 const express = require("express");
 const fetch = require("node-fetch");
+const compression = require("compression");
+const rateLimit = require("express-rate-limit");
 const app = express();
 const port = 3000;
+
+const ALLOWED_IP = ["::ffff:127.0.0.1"]; // add your ip here
+
+const checkIP = (req, res, next) => {
+  ALLOWED_IP.find(ip => {
+    if (ip !== req.ip) {
+      console.log(req.ip);
+      res.status(403).json({
+        message: "You shall not pass"
+      })
+    } else {
+      next();
+    }
+  })
+}
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests
+  delayMs: 0 // disable delaying - user has full speed until the max limit is reached
+});
+
+app.use(compression());
+app.use(checkIP);
+app.use("/api/", apiLimiter); // only applies to requests that begins with /api/
 
 app.get("/", (req, res) => {
   res.send("Hello!");
