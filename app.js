@@ -5,34 +5,32 @@ const rateLimit = require("express-rate-limit");
 const app = express();
 const port = 3000;
 
-const ALLOWED_IP = ["::ffff:127.0.0.1"]; // add your ip here
+const ALLOWED_IP = ["::ffff:127.0.0.1", "::1", "192.168.1.121", "127.0.0.1"]; // add your ip here
 
 const checkIP = (req, res, next) => {
-  ALLOWED_IP.find(ip => {
-    if (ip !== req.ip) {
-      console.log(req.ip);
-      res.status(403).json({
-        message: "Your IP address is not allowed"
-      })
-    } else {
-      next();
-    }
-  })
-}
+  if (ALLOWED_IP.includes(req.ip)) {
+    next();
+  } else {
+    console.log(`Your IP address is ${req.ip}`);
+    res.status(403).json({
+      message: "Your IP is not allowed",
+    });
+  }
+};
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests
-  delayMs: 0 // disable delaying - user has full speed until the max limit is reached
+  delayMs: 0, // disable delaying - user has full speed until the max limit is reached
 });
 
 app.use(compression());
-app.use(checkIP);
+app.use("/api/", checkIP); // only applies to requests that begins with /api/
 app.use("/api/", apiLimiter); // only applies to requests that begins with /api/
 
 app.get("/", (req, res) => {
   res.send("Hello!");
-})
+});
 
 app.get("/api/getPriceHistory/:startDate/:endDate", (req, res) => {
   const startDate = req.params.startDate;
@@ -63,6 +61,6 @@ app.get("/api/getPriceHistory/:startDate/:endDate", (req, res) => {
   getPriceHistory(startDate, endDate);
 });
 
-app.listen(port, () => {
+app.listen(port, "0.0.0.0", () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
