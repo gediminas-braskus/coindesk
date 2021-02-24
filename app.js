@@ -12,7 +12,7 @@ const checkIP = (req, res, next) => {
     if (ip !== req.ip) {
       console.log(req.ip);
       res.status(403).json({
-        message: "You shall not pass"
+        message: "Your IP address is not allowed"
       })
     } else {
       next();
