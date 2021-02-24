@@ -49,7 +49,7 @@ app.get("/api/getPriceHistory/:startDate/:endDate", (req, res) => {
         priceHistory[date] = price * 1000;
       });
 
-      return res.status(200).json(priceHistory);
+      res.status(200).json(priceHistory);
     } catch (error) {
       console.error(error);
       res.status(500).json({
