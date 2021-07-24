@@ -46,7 +46,7 @@ app.get("/api/getPriceHistory/:startDate/:endDate", (req, res) => {
       let priceHistory = {};
 
       entries.map(([date, price]) => {
-        priceHistory[date] = price * 1000;
+        priceHistory[date] = price * 100;
       });
 
       res.status(200).json(priceHistory);
